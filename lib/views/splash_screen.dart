@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:go_presence_sqflite/views/main_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'login_screen.dart';
 import 'home_screen.dart'; // halaman tujuan setelah splash
@@ -29,7 +30,7 @@ class _SplashScreenState extends State<SplashScreen> {
       context,
       MaterialPageRoute(
         builder:
-            (context) => isLoggedIn ? const HomeScreen() : const LoginScreen(),
+            (context) => isLoggedIn ? const MainScreen() : const LoginScreen(),
       ),
     );
   }

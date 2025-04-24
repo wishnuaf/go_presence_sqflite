@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_presence_sqflite/views/home_screen.dart';
+import 'package:go_presence_sqflite/views/main_screen.dart';
 import 'package:go_presence_sqflite/views/register_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -101,7 +102,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const HomeScreen(),
+                        builder: (context) => const MainScreen(),
                       ),
                     );
                   },

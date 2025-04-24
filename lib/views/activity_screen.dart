@@ -90,10 +90,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("Dari Tanggal"),
-                          Text(df.format(_fromDate!)),
-                        ],
+                        children: [Text("Dari"), Text(df.format(_fromDate!))],
                       ),
                     ),
                   ),
@@ -113,10 +110,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("Sampai Tanggal"),
-                          Text(df.format(_toDate!)),
-                        ],
+                        children: [Text("Sampai"), Text(df.format(_toDate!))],
                       ),
                     ),
                   ),
@@ -173,7 +167,16 @@ class _ActivityScreenState extends State<ActivityScreen> {
                                         color: Colors.blue,
                                       ),
                                       const SizedBox(width: 4),
-                                      Text("17:51:30"), // sementara static
+                                      Text(
+                                        data.jamPulang ??
+                                            '-', // ✅ tampilkan jika ada
+                                        style: TextStyle(
+                                          color:
+                                              data.jamPulang != null
+                                                  ? Colors.black
+                                                  : Colors.grey,
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 ],
@@ -186,18 +189,18 @@ class _ActivityScreenState extends State<ActivityScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 1,
-        selectedItemColor: Colors.blue,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Beranda'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history),
-            label: 'Aktivitas',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
-        ],
-      ),
+      // bottomNavigationBar: BottomNavigationBar(
+      //   currentIndex: 1,
+      //   selectedItemColor: Colors.blue,
+      //   items: const [
+      //     BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Beranda'),
+      //     BottomNavigationBarItem(
+      //       icon: Icon(Icons.history),
+      //       label: 'Aktivitas',
+      //     ),
+      //     BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
+      //   ],
+      // ),
     );
   }
 }
