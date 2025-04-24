@@ -5,7 +5,7 @@ class AbsensiModel {
   final String jamMasuk;
   final String latitude;
   final String longitude;
-  final String? jamPulang; // ⬅️ Tambahkan ini
+  final String? jamPulang;
 
   AbsensiModel({
     this.id,
@@ -14,7 +14,7 @@ class AbsensiModel {
     required this.jamMasuk,
     required this.latitude,
     required this.longitude,
-    this.jamPulang, // ⬅️ opsional saat absen masuk
+    this.jamPulang,
   });
 
   Map<String, dynamic> toMap() {

@@ -14,7 +14,7 @@ class UserModel {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'firstName': fullName,
+      'fullName': fullName,
       'email': email,
       'password': password,
     };

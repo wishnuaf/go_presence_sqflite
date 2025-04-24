@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:go_presence_sqflite/services/preference_service.dart';
 import 'package:go_presence_sqflite/views/main_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'login_screen.dart';
-import 'home_screen.dart'; // halaman tujuan setelah splash
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -17,12 +17,25 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     _navigateToNext();
+    checkLoginStatus();
   }
 
   Future<void> _navigateToNext() async {
     await Future.delayed(const Duration(seconds: 2));
     final prefs = await SharedPreferences.getInstance();
     final isLoggedIn = prefs.getBool('is_logged_in') ?? false;
+
+    if (isLoggedIn) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const MainScreen()),
+      );
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      );
+    }
 
     if (!mounted) return;
 
@@ -61,15 +74,6 @@ class _SplashScreenState extends State<SplashScreen> {
                     height: 150,
                     color: Colors.white,
                   ),
-                  // const SizedBox(height: 16),
-                  // const Text(
-                  //   'GoPresence',
-                  //   style: TextStyle(
-                  //     color: Colors.white,
-                  //     fontSize: 24,
-                  //     fontWeight: FontWeight.bold,
-                  //   ),
-                  // ),
                 ],
               ),
             ),

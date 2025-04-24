@@ -1,8 +1,9 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
-Future<void> saveLoginStatus(bool isLoggedIn) async {
+Future<void> saveLoginSession(int userId) async {
   final prefs = await SharedPreferences.getInstance();
-  await prefs.setBool('is_logged_in', isLoggedIn);
+  await prefs.setBool('is_logged_in', true);
+  await prefs.setInt('user_id', userId);
 }
 
 Future<bool> checkLoginStatus() async {
@@ -10,7 +11,7 @@ Future<bool> checkLoginStatus() async {
   return prefs.getBool('is_logged_in') ?? false;
 }
 
-Future<void> logoutUser() async {
+Future<void> clearLoginSession() async {
   final prefs = await SharedPreferences.getInstance();
-  await prefs.setBool('is_logged_in', false);
+  await prefs.clear();
 }

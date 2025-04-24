@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_presence_sqflite/services/app_database.dart';
+import 'package:go_presence_sqflite/utils/location_utils.dart';
 import 'package:intl/intl.dart';
 import '../models/absensi_model.dart';
-import '../services/absensi_db_helper.dart';
 
 class ActivityScreen extends StatefulWidget {
   const ActivityScreen({super.key});
@@ -25,7 +26,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
   }
 
   Future<void> _loadReports() async {
-    final allData = await AbsensiDbHelper().getAllAbsensi();
+    final allData = await AppDatabase().getAllAbsensi();
     setState(() {
       _filteredReports =
           allData.where((e) {
@@ -67,7 +68,6 @@ class _ActivityScreenState extends State<ActivityScreen> {
         backgroundColor: Colors.white,
         foregroundColor: Colors.blue,
         elevation: 0,
-        leading: BackButton(color: Colors.blue),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -144,38 +144,81 @@ class _ActivityScreenState extends State<ActivityScreen> {
                             margin: const EdgeInsets.only(bottom: 12),
                             child: ListTile(
                               title: Text("${data.hari}, ${data.tanggal}"),
-                              subtitle: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
-                                      const Icon(
-                                        Icons.login,
-                                        size: 20,
-                                        color: Colors.blue,
+                                      Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.login,
+                                            size: 20,
+                                            color: Colors.blue,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(data.jamMasuk),
+                                        ],
                                       ),
-                                      const SizedBox(width: 4),
-                                      Text(data.jamMasuk),
+                                      Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.logout,
+                                            size: 20,
+                                            color: Colors.blue,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            data.jamPulang ?? '-',
+                                            style: TextStyle(
+                                              color:
+                                                  data.jamPulang != null
+                                                      ? Colors.black
+                                                      : Colors.grey,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ],
                                   ),
+                                  const SizedBox(height: 6),
                                   Row(
                                     children: [
                                       const Icon(
-                                        Icons.logout,
+                                        Icons.location_on,
                                         size: 20,
                                         color: Colors.blue,
                                       ),
                                       const SizedBox(width: 4),
-                                      Text(
-                                        data.jamPulang ??
-                                            '-', // ✅ tampilkan jika ada
-                                        style: TextStyle(
-                                          color:
-                                              data.jamPulang != null
-                                                  ? Colors.black
-                                                  : Colors.grey,
+                                      FutureBuilder<String>(
+                                        future: getAddressFromLatLng(
+                                          data.latitude,
+                                          data.longitude,
                                         ),
+                                        builder: (context, snapshot) {
+                                          if (snapshot.connectionState ==
+                                              ConnectionState.waiting) {
+                                            return const Text(
+                                              "Sedang memuat alamat...",
+                                            );
+                                          } else if (snapshot.hasError) {
+                                            return const Text(
+                                              "Gagal memuat alamat",
+                                            );
+                                          } else {
+                                            return Text(
+                                              snapshot.data ?? "-",
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                              softWrap: true,
+                                              style: const TextStyle(
+                                                fontSize: 13,
+                                              ),
+                                            );
+                                          }
+                                        },
                                       ),
                                     ],
                                   ),
@@ -189,18 +232,6 @@ class _ActivityScreenState extends State<ActivityScreen> {
           ],
         ),
       ),
-      // bottomNavigationBar: BottomNavigationBar(
-      //   currentIndex: 1,
-      //   selectedItemColor: Colors.blue,
-      //   items: const [
-      //     BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Beranda'),
-      //     BottomNavigationBarItem(
-      //       icon: Icon(Icons.history),
-      //       label: 'Aktivitas',
-      //     ),
-      //     BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
-      //   ],
-      // ),
     );
   }
 }

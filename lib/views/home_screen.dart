@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_presence_sqflite/models/absensi_model.dart';
-import 'package:go_presence_sqflite/services/absensi_db_helper.dart';
+import 'package:go_presence_sqflite/services/app_database.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/location_service.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -18,11 +20,13 @@ class _HomeScreenState extends State<HomeScreen> {
   String _currentTime = DateFormat('HH:mm:ss').format(DateTime.now());
   Position? _currentPosition;
   bool _sudahAbsenMasuk = false;
+  String _fullName = '...';
 
   @override
   void initState() {
     super.initState();
     _getLocation();
+    _loadUserData();
     _startClock();
   }
 
@@ -48,45 +52,66 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _loadUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getInt('user_id');
+    if (userId != null) {
+      final user = await AppDatabase().getUserById(userId);
+      if (user != null) {
+        setState(() {
+          _fullName = user.fullName;
+        });
+      }
+    }
+  }
+
   void _absenMasuk() async {
-    final now = DateTime.now();
-    final hari = DateFormat('EEEE', 'id_ID').format(now);
-    final tanggal = DateFormat('dd MMMM yyyy', 'id_ID').format(now);
-    final jam = DateFormat('HH:mm:ss').format(now);
+    try {
+      final now = DateTime.now();
+      final hari = DateFormat('EEEE', 'id_ID').format(now);
+      final tanggal = DateFormat('dd MMMM yyyy', 'id_ID').format(now);
+      final jam = DateFormat('HH:mm:ss').format(now);
 
-    final lat = _currentPosition?.latitude.toStringAsFixed(5) ?? 'Unknown';
-    final lng = _currentPosition?.longitude.toStringAsFixed(5) ?? 'Unknown';
+      final lat = _currentPosition?.latitude.toStringAsFixed(5) ?? 'Unknown';
+      final lng = _currentPosition?.longitude.toStringAsFixed(5) ?? 'Unknown';
 
-    final absensi = AbsensiModel(
-      hari: hari,
-      tanggal: tanggal,
-      jamMasuk: jam,
-      latitude: lat,
-      longitude: lng,
-      jamPulang: jam,
-    );
+      print("Absen Masuk:\nTanggal: $tanggal\nJam: $jam\nLatLng: $lat, $lng");
 
-    await AbsensiDbHelper().insertAbsensi(absensi);
+      final absensi = AbsensiModel(
+        hari: hari,
+        tanggal: tanggal,
+        jamMasuk: jam,
+        latitude: lat,
+        longitude: lng,
+        jamPulang: '', // atau null jika nullable
+      );
 
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Absen Berhasil'),
-            content: Text(
-              'Hari: $hari\nTanggal: $tanggal\nJam: $jam\nLat: $lat\nLng: $lng',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('OK'),
+      await AppDatabase().insertAbsensi(absensi);
+
+      showDialog(
+        context: context,
+        builder:
+            (context) => AlertDialog(
+              title: const Text('Absen Berhasil'),
+              content: Text(
+                'Hari: $hari\nTanggal: $tanggal\nJam: $jam\nLat: $lat\nLng: $lng',
               ),
-            ],
-          ),
-    );
-    setState(() {
-      _sudahAbsenMasuk = true;
-    });
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('OK'),
+                ),
+              ],
+            ),
+      );
+
+      setState(() {
+        _sudahAbsenMasuk = true;
+      });
+    } catch (e, stack) {
+      debugPrint("❌ Error saat absen masuk: $e");
+      debugPrint("🔍 Stack trace: $stack");
+    }
   }
 
   void _absenPulang() async {
@@ -94,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final jamPulang = DateFormat('HH:mm:ss').format(now);
     final tanggal = DateFormat('dd MMMM yyyy', 'id_ID').format(now);
 
-    await AbsensiDbHelper().updateJamPulang(tanggal, jamPulang);
+    await AppDatabase().updateJamPulang(tanggal, jamPulang);
 
     showDialog(
       context: context,
@@ -112,22 +137,17 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear(); // hapus session login dan user_id
+    if (!mounted) return;
+    Navigator.pushReplacementNamed(context, '/login');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      // bottomNavigationBar: BottomNavigationBar(
-      //   currentIndex: 0,
-      //   selectedItemColor: Colors.blue,
-      //   items: const [
-      //     BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Beranda'),
-      //     BottomNavigationBarItem(
-      //       icon: Icon(Icons.history),
-      //       label: 'Aktivitas',
-      //     ),
-      //     BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
-      //   ],
-      // ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
@@ -136,32 +156,42 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               // Profile
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const CircleAvatar(
                     radius: 30,
-                    backgroundImage: AssetImage(
-                      'assets/images/profile.jpg',
-                    ), // Ganti sesuai gambar kamu
+                    // backgroundImage: AssetImage('assets/images/profile.jpg'),
                   ),
                   const SizedBox(width: 16),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Charlier Herwitz",
-                        style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _fullName,
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2,
+                          softWrap: false,
                         ),
-                      ),
-                      Text(
-                        "UI/UX Designer",
-                        style: GoogleFonts.poppins(color: Colors.grey[700]),
-                      ),
-                    ],
+                        Text(
+                          "UI/UX Designer",
+                          style: GoogleFonts.poppins(color: Colors.grey[700]),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: _logout,
+                    icon: const Icon(Icons.logout, color: Colors.red),
+                    tooltip: 'Logout',
                   ),
                 ],
               ),
+
               const SizedBox(height: 20),
               // Date & Time
               Row(
@@ -221,47 +251,93 @@ class _HomeScreenState extends State<HomeScreen> {
                 height: 160,
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child:
                     _currentPosition != null
-                        ? Center(
-                          child: Text(
-                            "Lat: ${_currentPosition!.latitude.toStringAsFixed(5)}\nLng: ${_currentPosition!.longitude.toStringAsFixed(5)}",
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(fontSize: 16),
+                        ? ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: GoogleMap(
+                            initialCameraPosition: CameraPosition(
+                              target: LatLng(
+                                _currentPosition!.latitude,
+                                _currentPosition!.longitude,
+                              ),
+                              zoom: 16,
+                            ),
+                            markers: {
+                              Marker(
+                                markerId: const MarkerId("lokasi_saya"),
+                                position: LatLng(
+                                  _currentPosition!.latitude,
+                                  _currentPosition!.longitude,
+                                ),
+                              ),
+                            },
+                            zoomControlsEnabled: false,
+                            myLocationEnabled: true,
+                            myLocationButtonEnabled: false,
+                            onMapCreated: (controller) {},
                           ),
                         )
                         : const Center(child: CircularProgressIndicator()),
               ),
+
               const Spacer(),
-              SizedBox(
-                width: double.infinity,
-                height: 55,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    if (!_sudahAbsenMasuk) {
-                      _absenMasuk();
-                    } else {
-                      _absenPulang();
-                    }
-                  },
-                  icon: Icon(
-                    _sudahAbsenMasuk ? Icons.logout : Icons.how_to_reg,
-                  ),
-                  label: Text(
-                    _sudahAbsenMasuk ? "Absen Pulang" : "Absen Masuk",
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+              Row(
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: 50,
+                      child: ElevatedButton.icon(
+                        onPressed:
+                            !_sudahAbsenMasuk
+                                ? () {
+                                  _absenMasuk();
+                                  setState(() {
+                                    _sudahAbsenMasuk = true;
+                                  });
+                                }
+                                : null,
+                        icon: const Icon(Icons.login),
+                        label: const Text("Absen Masuk"),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
                     ),
-                    textStyle: const TextStyle(fontSize: 16),
                   ),
-                ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: SizedBox(
+                      height: 50,
+                      child: ElevatedButton.icon(
+                        onPressed:
+                            _sudahAbsenMasuk
+                                ? () {
+                                  _absenPulang();
+                                  setState(() {
+                                    _sudahAbsenMasuk = false;
+                                  });
+                                }
+                                : null,
+                        icon: const Icon(Icons.logout),
+                        label: const Text("Absen Pulang"),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

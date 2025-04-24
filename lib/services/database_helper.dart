@@ -22,8 +22,7 @@ class DatabaseHelper {
         return db.execute('''
           CREATE TABLE users(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            firstName TEXT,
-            lastName TEXT,
+            fullName TEXT,
             email TEXT,
             password TEXT
           )

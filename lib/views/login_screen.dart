@@ -1,9 +1,9 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:go_presence_sqflite/views/home_screen.dart';
 import 'package:go_presence_sqflite/views/main_screen.dart';
 import 'package:go_presence_sqflite/views/register_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -14,6 +14,12 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool _obscureText = true;
+
+  Future<void> saveLoginSession(int userId) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('is_logged_in', true);
+    await prefs.setInt('user_id', userId);
+  }
 
   @override
   Widget build(BuildContext context) {
