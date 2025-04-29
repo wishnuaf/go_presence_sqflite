@@ -24,7 +24,8 @@ class DatabaseHelper {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             fullName TEXT,
             email TEXT,
-            password TEXT
+            password TEXT,
+            position TEXT
           )
         ''');
       },
@@ -34,5 +35,31 @@ class DatabaseHelper {
   Future<int> insertUser(UserModel user) async {
     final db = await database;
     return await db.insert('users', user.toMap());
+  }
+
+  Future<UserModel?> getUserById(int id) async {
+    final db = await database;
+    final result = await db.query('users', where: 'id = ?', whereArgs: [id]);
+    if (result.isNotEmpty) {
+      return UserModel.fromMap(result.first);
+    }
+    return null;
+  }
+
+  // 🔥 Tambahan ini untuk load semua users
+  Future<List<UserModel>> getAllUsers() async {
+    final db = await database;
+    final result = await db.query('users');
+    return result.map((map) => UserModel.fromMap(map)).toList();
+  }
+
+  Future<int> updateUser(UserModel user) async {
+    final db = await database;
+    return await db.update(
+      'users',
+      user.toMap(),
+      where: 'id = ?',
+      whereArgs: [user.id],
+    );
   }
 }

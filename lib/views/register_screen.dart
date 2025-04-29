@@ -63,7 +63,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       await DatabaseHelper().insertUser(user);
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text("Registration successful")));
+      ).showSnackBar(const SnackBar(content: Text("Pendaftaran Sukses!")));
       Navigator.pop(context);
     }
   }
@@ -205,15 +205,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     Expanded(
                       child: Text.rich(
                         TextSpan(
-                          text: "I agree to the ",
+                          text: "Setuju untuk membuat akun",
                           style: GoogleFonts.poppins(fontSize: 13),
-                          children: [
-                            TextSpan(
-                              text: "Terms & Conditions & Privacy Policy",
-                              style: const TextStyle(color: Colors.blue),
-                            ),
-                            const TextSpan(text: " set out by this site."),
-                          ],
+                          // children: [
+                          //   TextSpan(
+                          //     text: "Terms & Conditions & Privacy Policy",
+                          //     style: const TextStyle(color: Colors.blue),
+                          //   ),
+                          //   const TextSpan(text: " set out by this site."),
+                          // ],
                         ),
                       ),
                     ),
@@ -242,32 +242,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                 ),
-
-                // const SizedBox(height: 16),
-                // Row(
-                //   children: [
-                //     const Expanded(child: Divider()),
-                //     Padding(
-                //       padding: const EdgeInsets.symmetric(horizontal: 8),
-                //       child: Text(
-                //         "Or continue with social account",
-                //         style: GoogleFonts.poppins(fontSize: 12),
-                //       ),
-                //     ),
-                //     const Expanded(child: Divider()),
-                //   ],
-                // ),
-                // const SizedBox(height: 16),
-                // SizedBox(
-                //   height: 50,
-                //   child: OutlinedButton.icon(
-                //     onPressed: () {},
-                //     icon: Image.asset('assets/images/google.png', height: 24),
-                //     label: const Text("Google"),
-                //   ),
-                // ),
                 const SizedBox(height: 24),
-                // const Spacer(),
                 Center(
                   child: Text.rich(
                     TextSpan(

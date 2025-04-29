@@ -55,13 +55,20 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _loadUserData() async {
     final prefs = await SharedPreferences.getInstance();
     final userId = prefs.getInt('user_id');
+    debugPrint('UserID dari SharedPreferences: $userId');
+
     if (userId != null) {
       final user = await AppDatabase().getUserById(userId);
       if (user != null) {
+        debugPrint('User ditemukan: ${user.fullName} - ${user.position}');
         setState(() {
-          _fullName = user.fullName;
+          _fullName = user.fullName ?? '-';
         });
+      } else {
+        debugPrint('❗ User tidak ditemukan di database');
       }
+    } else {
+      debugPrint('❗ UserID tidak ada di SharedPreferences');
     }
   }
 
@@ -160,7 +167,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   const CircleAvatar(
                     radius: 30,
-                    // backgroundImage: AssetImage('assets/images/profile.jpg'),
+                    backgroundImage: AssetImage('assets/images/dadang.jpg'),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -168,18 +175,26 @@ class _HomeScreenState extends State<HomeScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _fullName,
+                          // _fullName,
+                          'Dadang',
                           style: GoogleFonts.poppins(
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.normal,
                             fontSize: 16,
                           ),
                           overflow: TextOverflow.ellipsis,
-                          maxLines: 2,
+                          maxLines: 1,
                           softWrap: false,
                         ),
                         Text(
-                          "UI/UX Designer",
-                          style: GoogleFonts.poppins(color: Colors.grey[700]),
+                          // _fullName,
+                          'UI/UX Designer',
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.normal,
+                            fontSize: 14,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                          softWrap: false,
                         ),
                       ],
                     ),
@@ -248,7 +263,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 20),
               // Map/Location
               Container(
-                height: 160,
+                height: 500,
                 width: double.infinity,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),

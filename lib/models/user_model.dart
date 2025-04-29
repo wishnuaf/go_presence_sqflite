@@ -1,15 +1,11 @@
 class UserModel {
-  final int? id;
-  final String fullName;
-  final String email;
-  final String password;
+  int? id;
+  String? fullName;
+  String? email;
+  String? password;
+  String? position;
 
-  UserModel({
-    this.id,
-    required this.fullName,
-    required this.email,
-    required this.password,
-  });
+  UserModel({this.id, this.fullName, this.email, this.password, this.position});
 
   Map<String, dynamic> toMap() {
     return {
@@ -17,6 +13,7 @@ class UserModel {
       'fullName': fullName,
       'email': email,
       'password': password,
+      'position': position,
     };
   }
 
@@ -26,6 +23,7 @@ class UserModel {
       fullName: map['fullName'],
       email: map['email'],
       password: map['password'],
+      position: map['position'],
     );
   }
 }

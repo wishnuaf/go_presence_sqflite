@@ -63,12 +63,14 @@ class _ActivityScreenState extends State<ActivityScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text("Aktivitas"),
         centerTitle: true,
         backgroundColor: Colors.white,
         foregroundColor: Colors.blue,
         elevation: 0,
       ),
+
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -86,7 +88,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                       ),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
-                        color: Colors.grey[100],
+                        color: Colors.blue[100],
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -106,7 +108,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                       ),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
-                        color: Colors.grey[100],
+                        color: Colors.blue[100],
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -123,10 +125,19 @@ class _ActivityScreenState extends State<ActivityScreen> {
               height: 48,
               child: ElevatedButton(
                 onPressed: _loadReports,
-                child: const Text("Lihat Laporan"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  "Lihat Laporan",
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 26),
             // Laporan
             Expanded(
               child:
@@ -192,33 +203,44 @@ class _ActivityScreenState extends State<ActivityScreen> {
                                         color: Colors.blue,
                                       ),
                                       const SizedBox(width: 4),
-                                      FutureBuilder<String>(
-                                        future: getAddressFromLatLng(
-                                          data.latitude,
-                                          data.longitude,
+                                      Expanded(
+                                        // Tambahkan ini
+                                        child: FutureBuilder<String>(
+                                          future: getAddressFromLatLng(
+                                            data.latitude,
+                                            data.longitude,
+                                          ),
+                                          builder: (context, snapshot) {
+                                            if (snapshot.connectionState ==
+                                                ConnectionState.waiting) {
+                                              return const Text(
+                                                "Sedang memuat alamat...",
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                                softWrap: true,
+                                                style: TextStyle(fontSize: 13),
+                                              );
+                                            } else if (snapshot.hasError) {
+                                              return const Text(
+                                                "Gagal memuat alamat",
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                                softWrap: true,
+                                                style: TextStyle(fontSize: 13),
+                                              );
+                                            } else {
+                                              return Text(
+                                                snapshot.data ?? "-",
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                                softWrap: true,
+                                                style: const TextStyle(
+                                                  fontSize: 13,
+                                                ),
+                                              );
+                                            }
+                                          },
                                         ),
-                                        builder: (context, snapshot) {
-                                          if (snapshot.connectionState ==
-                                              ConnectionState.waiting) {
-                                            return const Text(
-                                              "Sedang memuat alamat...",
-                                            );
-                                          } else if (snapshot.hasError) {
-                                            return const Text(
-                                              "Gagal memuat alamat",
-                                            );
-                                          } else {
-                                            return Text(
-                                              snapshot.data ?? "-",
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
-                                              softWrap: true,
-                                              style: const TextStyle(
-                                                fontSize: 13,
-                                              ),
-                                            );
-                                          }
-                                        },
                                       ),
                                     ],
                                   ),

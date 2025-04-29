@@ -33,10 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               const SizedBox(height: 40),
               Center(
-                child: Image.asset(
-                  'assets/images/gopresence.png', // Ganti dengan path ikon kamu
-                  height: 60,
-                ),
+                child: Image.asset('assets/images/gopresence.png', height: 60),
               ),
               const SizedBox(height: 32),
               Text(
@@ -128,44 +125,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ),
-              // const SizedBox(height: 24),
-              // Row(
-              //   children: [
-              //     const Expanded(child: Divider()),
-              //     Padding(
-              //       padding: const EdgeInsets.symmetric(horizontal: 8),
-              //       child: Text(
-              //         "Or continue with social account",
-              //         style: GoogleFonts.poppins(fontSize: 12),
-              //       ),
-              //     ),
-              //     const Expanded(child: Divider()),
-              //   ],
-              // ),
-              // const SizedBox(height: 16),
-              // SizedBox(
-              //   width: double.infinity,
-              //   height: 50,
-              //   child: OutlinedButton.icon(
-              //     icon: Image.asset(
-              //       'assets/images/google.png', // Ganti dengan ikon Google
-              //       height: 24,
-              //     ),
-              //     onPressed: () {},
-              //     label: Text(
-              //       'Google',
-              //       style: GoogleFonts.poppins(
-              //         fontSize: 16,
-              //         color: Colors.black87,
-              //       ),
-              //     ),
-              //     style: OutlinedButton.styleFrom(
-              //       shape: RoundedRectangleBorder(
-              //         borderRadius: BorderRadius.circular(12),
-              //       ),
-              //     ),
-              //   ),
-              // ),
               const Spacer(),
               Center(
                 child: Text.rich(
